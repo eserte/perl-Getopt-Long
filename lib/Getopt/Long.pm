@@ -370,16 +370,20 @@ sub GetOptionsFromArray(@) {
 		&& ref($userlinkage->{$opt}) ) {
 		unshift (@optionlist, $userlinkage->{$opt});
 	    }
-	    unless ( @optionlist > 0
-		    && ref($optionlist[0]) && ref($optionlist[0]) eq 'CODE' ) {
+	    if ( @optionlist > 0 && ref($optionlist[0]) eq 'CODE' ) {
+		$linkage{'<>'} = shift (@optionlist);
+		next;
+	    } elsif ( @optionlist > 0 && ref($optionlist[0]) eq 'ARRAY' ) {
+		my $arrref = shift (@optionlist);
+		$linkage{'<>'} = sub { push @$arrref, $_[0] };
+		next;
+	    } else {
 		$error .= "Option spec <> requires a reference to a subroutine\n";
 		# Kill the linkage (to avoid another error).
 		shift (@optionlist)
 		  if @optionlist && ref($optionlist[0]);
 		next;
 	    }
-	    $linkage{'<>'} = shift (@optionlist);
-	    next;
 	}
 
 	# Parse option spec.

@@ -11,7 +11,7 @@ BEGIN {
 
 use Getopt::Long;
 
-print "1..37\n";
+print "1..40\n";
 
 @ARGV = qw(-Foo -baR --foo bar);
 Getopt::Long::Configure ("no_ignore_case");
@@ -118,4 +118,21 @@ print (!(exists $lnk{bar})   ? "" : "not ", "ok 28\n");
     print "ok 36\n";
     print +(($got eq " remain=-thru,-here,-more,--,1")
 	    ? "" : "not ", "ok 37\n");
+}
+
+{
+    @ARGV = (qw[-thru -here -more 1]);
+    my $got = "";
+    Getopt::Long::Configure("default");
+    Getopt::Long::Configure("pass_through","norequire_order");
+    my @restargs;
+    print "not" unless GetOptions
+	("here" => sub { $got .= " sub_here"; },
+	 "<>" => \@restargs);
+    $got .= " remain=".join(',',@ARGV);
+    print "ok 38\n";
+    print +(($got eq " sub_here remain=")
+	    ? "" : "not ", "ok 39\n");
+    print +((join("|", @restargs) eq "-thru|-more|1")
+	    ? "" : "not ", "ok 40\n");
 }
